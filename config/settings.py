@@ -10,7 +10,12 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.0/ref/settings/
 """
 
+import os
+
+from dotenv import load_dotenv
 from pathlib import Path
+
+load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -24,11 +29,24 @@ SECRET_KEY = 'django-insecure-*4$w7@*&%(i-++3f!c-#1h5d96fhc^x=^l+(@d&#fp#z_$koky
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
-
-ALLOWED_HOSTS = []
+PROD = int(os.environ.get("PROD", default=0))
+ALLOWED_HOSTS = ["*"]
 
 
 # Application definition
+
+LOCAL_APPS = [
+    'product'
+]
+
+THIRD_PARTY_APPS = [
+    'ckeditor',
+    'rest_framework',
+    'corsheaders',
+    'rest_framework_swagger',
+    'easy_thumbnails',
+    'drf_yasg',
+]
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -37,12 +55,19 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-]
 
+    *LOCAL_APPS,
+    *THIRD_PARTY_APPS
+]
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
+
+    # CORS
+    'corsheaders.middleware.CorsMiddleware',
+    'django.middleware.common.CommonMiddleware',
+
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
@@ -54,7 +79,9 @@ ROOT_URLCONF = 'config.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [
+            os.path.join(BASE_DIR, "templates")
+        ],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -73,13 +100,37 @@ WSGI_APPLICATION = 'config.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
-}
+# Mongo db connection
 
+if not DEBUG:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'djongo',
+            'NAME': 'demos',
+        }
+    }
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'djongo',
+            'NAME': os.getenv('MONGO_DB_NAME'),
+            'ENFORCE_SCHEMA': True,
+            'CLIENT': {
+                'host': 'mongodb',
+                'port': 27018,
+                'username': os.getenv('MONGO_DB_USERNAME'),
+                'password': os.getenv('MONGO_DB_PASSWORD'),
+                'authSource': 'admin',
+                'authMechanism': 'SCRAM-SHA-1', 
+            }
+        }
+    }
+
+
+CORS_ORIGIN_ALLOW_ALL = False
+CORS_ORIGIN_WHITELIST = (
+    'http://127.0.0.1:8000',
+)
 
 # Password validation
 # https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators
@@ -116,6 +167,16 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 
 STATIC_URL = 'static/'
+
+if not PROD:
+    STATIC_ROOT = os.path.join(BASE_DIR, "static")
+else:
+    STATICFILES_DIRS = [
+        os.path.join(BASE_DIR, "static")
+    ]
+
+MEDIA_URL = "/media/"
+MEDIA_ROOT = BASE_DIR / "media"
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
