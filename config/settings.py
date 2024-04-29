@@ -116,7 +116,7 @@ else:
             'NAME': os.getenv('MONGO_DB_NAME'),
             'ENFORCE_SCHEMA': True,
             'CLIENT': {
-                'host': 'localhost',
+                'host': 'db',
                 'port': 27017,
                 'username': 'mongadmin',
                 'password': 'mysecretpassword', 
