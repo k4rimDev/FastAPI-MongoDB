@@ -116,12 +116,10 @@ else:
             'NAME': os.getenv('MONGO_DB_NAME'),
             'ENFORCE_SCHEMA': True,
             'CLIENT': {
-                'host': 'mongodb',
-                'port': 27018,
-                'username': os.getenv('MONGO_DB_USERNAME'),
-                'password': os.getenv('MONGO_DB_PASSWORD'),
-                'authSource': 'admin',
-                'authMechanism': 'SCRAM-SHA-1', 
+                'host': 'localhost',
+                'port': 27017,
+                'username': 'mongadmin',
+                'password': 'mysecretpassword', 
             }
         }
     }

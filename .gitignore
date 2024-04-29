@@ -139,3 +139,6 @@ dmypy.json
 cython_debug/
 27
 Grepper Ad✕
+
+_data
+_data/*
